@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chem Guru — Chemistry Puzzle Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --accent: #00e5a0;
+    --accent2: #00b8ff;
+    --danger: #ff4d6d;
+    --warning: #ffd60a;
+    --text: #f0f4ff;
+    --muted: #7a8caa;
+    --border: rgba(255,255,255,0.08);
+    --glow: 0 0 24px rgba(0,229,160,0.18);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid pattern */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,160,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,160,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container { max-width: 480px; margin: auto; padding: 1.5rem 1rem 4rem; position: relative; z-index: 1; }
+
+  /* Header */
+  .top-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+  .logo {
+    font-family: 'Baloo 2', cursive;
+    font-size: 22px; font-weight: 800;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .logo span { font-size: 11px; font-weight: 500; display: block; -webkit-text-fill-color: var(--muted); margin-top: -4px; letter-spacing: 1px; }
+  .level-pill {
+    font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 99px;
+    border: 1px solid var(--accent); color: var(--accent);
+    background: rgba(0,229,160,0.06);
+  }
+
+  /* Score cards */
+  .score-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 1.2rem; }
+  .score-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 10px 8px; text-align: center;
+  }
+  .score-card .val { font-family: 'Baloo 2', cursive; font-size: 22px; font-weight: 700; }
+  .score-card .lbl { font-size: 10px; color: var(--muted); letter-spacing: 0.5px; margin-top: -2px; }
+  .score-card.s-correct .val { color: var(--accent); }
+  .score-card.s-wrong .val { color: var(--danger); }
+  .score-card.s-total .val { color: var(--accent2); }
+
+  /* Progress */
+  .progress-wrap { margin-bottom: 1.4rem; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+  .progress-bg { height: 5px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+  .progress-fill { height: 5px; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 99px; transition: width 0.4s ease; }
+
+  /* Question card */
+  .q-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-bottom: 1.2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .q-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+  .q-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 10px;
+  }
+  .reaction {
+    font-family: 'Baloo 2', cursive;
+    font-size: 28px; font-weight: 700;
+    color: var(--text); text-align: center;
+    margin: 10px 0 14px;
+    letter-spacing: 1px;
+    line-height: 1.3;
+  }
+  .hint-box {
+    background: var(--surface2);
+    border-radius: 10px; padding: 10px 14px;
+    font-size: 13px; color: var(--muted);
+    border-left: 3px solid var(--accent2);
+    line-height: 1.5;
+  }
+  .hint-box strong { color: var(--accent2); }
+
+  /* Options */
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+  .opt {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 10px;
+    font-family: 'Baloo 2', cursive;
+    font-size: 15px; font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    line-height: 1.3;
+  }
+  .opt:hover { border-color: rgba(0,229,160,0.4); background: rgba(0,229,160,0.05); transform: translateY(-1px); }
+  .opt.correct { background: rgba(0,229,160,0.12); border-color: var(--accent); color: var(--accent); }
+  .opt.wrong { background: rgba(255,77,109,0.12); border-color: var(--danger); color: var(--danger); }
+
+  /* Feedback */
+  .feedback {
+    text-align: center; font-size: 14px; font-weight: 600;
+    min-height: 24px; margin-bottom: 1rem; padding: 6px;
+    border-radius: 8px; transition: all 0.2s;
+  }
+  .feedback.correct { color: var(--accent); background: rgba(0,229,160,0.08); }
+  .feedback.wrong { color: var(--danger); background: rgba(255,77,109,0.08); }
+
+  /* Next button */
+  .next-btn {
+    width: 100%; padding: 14px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border: none; border-radius: 14px;
+    font-family: 'Baloo 2', cursive;
+    font-size: 16px; font-weight: 700;
+    color: #0a0e1a; cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    letter-spacing: 0.5px;
+  }
+  .next-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .next-btn:disabled { opacity: 0.25; cursor: not-allowed; transform: none; }
+
+  /* End screen */
+  .end-screen { text-align: center; padding: 2rem 0.5rem; animation: fadeIn 0.5s ease; }
+  .end-emoji { font-size: 64px; margin-bottom: 1rem; }
+  .end-title { font-family: 'Baloo 2', cursive; font-size: 28px; font-weight: 800; margin-bottom: 8px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .end-msg { font-size: 15px; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.6; }
+  .end-score-big {
+    font-family: 'Baloo 2', cursive; font-size: 56px; font-weight: 800;
+    color: var(--accent); margin: 0.5rem 0;
+  }
+  .end-score-sub { font-size: 13px; color: var(--muted); margin-bottom: 1.5rem; }
+  .restart-btn {
+    padding: 14px 36px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    border-radius: 14px;
+    font-family: 'Baloo 2', cursive;
+    font-size: 16px; font-weight: 700;
+    color: var(--accent); cursor: pointer;
+    transition: all 0.2s;
+  }
+  .restart-btn:hover { background: rgba(0,229,160,0.1); transform: translateY(-1px); }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  .q-card { animation: fadeIn 0.3s ease; }
+</style>
+</head>
+<body>
+<div class="container" id="app">
+
+  <div class="top-bar">
+    <div class="logo">⚗️ Chem Guru <span>Chemistry Puzzle Game</span></div>
+    <div class="level-pill" id="levelPill">Level 1</div>
+  </div>
+
+  <div class="score-row">
+    <div class="score-card s-correct"><div class="val" id="sCorrect">0</div><div class="lbl">Sahi ✓</div></div>
+    <div class="score-card s-wrong"><div class="val" id="sWrong">0</div><div class="lbl">Galat ✗</div></div>
+    <div class="score-card s-total"><div class="val" id="sQ">1/5</div><div class="lbl">Sawaal</div></div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-label"><span id="progLabel">Shuruat</span><span id="progPct">0%</span></div>
+    <div class="progress-bg"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="q-card" id="qCard">
+    <div class="q-tag">Reaction kya banega?</div>
+    <div class="reaction" id="reactionText"></div>
+    <div class="hint-box"><strong>Hint:</strong> <span id="hintText"></span></div>
+  </div>
+
+  <div class="options" id="optGrid"></div>
+  <div class="feedback" id="feedback"></div>
+  <button class="next-btn" id="nextBtn" disabled onclick="nextQuestion()">Agla Sawaal →</button>
+
+</div>
+
+<script>
+const levels = [
+  { name: "Level 1 — Aasaan", short: "Level 1", questions: [
+    { r: "H₂ + O → ?", hint: "Yeh peene ka paani hai!", ans: "H₂O", opts: ["H₂O","CO₂","NaCl","O₂"] },
+    { r: "Na + Cl → ?", hint: "Khane mein daalte hain!", ans: "NaCl", opts: ["NaCl","KCl","HCl","NaOH"] },
+    { r: "C + O₂ → ?", hint: "Hum saans chodne par yahi nikalte hain", ans: "CO₂", opts: ["CO₂","H₂O","CH₄","SO₂"] },
+    { r: "Fe + O₂ → ?", hint: "Lohey pe paani padne par hota hai!", ans: "Fe₂O₃", opts: ["Fe₂O₃","FeS","FeCl₂","FeCO₃"] },
+    { r: "HCl + NaOH → ?", hint: "Acid aur base milenge toh...", ans: "NaCl + H₂O", opts: ["NaCl + H₂O","Na₂O + HCl","CO₂ + H₂","NaH + Cl₂"] },
+  ]},
+  { name: "Level 2 — Thoda Mushkil", short: "Level 2", questions: [
+    { r: "Zn + H₂SO₄ → ?", hint: "Zinc + Sulfuric acid!", ans: "ZnSO₄ + H₂", opts: ["ZnSO₄ + H₂","ZnO + H₂O","ZnCl₂ + SO₃","Zn₂S + H₂O"] },
+    { r: "CH₄ + 2O₂ → ?", hint: "Gas jalane par kya hota hai?", ans: "CO₂ + 2H₂O", opts: ["CO₂ + 2H₂O","CO + H₂O","CH₂ + O₃","C + H₂ + O₂"] },
+    { r: "CaCO₃ → CaO + ?", hint: "Limestone garam karo...", ans: "CO₂", opts: ["CO₂","O₂","Ca₂O","H₂O"] },
+    { r: "2H₂O₂ → 2H₂O + ?", hint: "Hydrogen peroxide toot-ta hai toh...", ans: "O₂", opts: ["O₂","H₂","H₂O₂","CO₂"] },
+    { r: "AgNO₃ + NaCl → ?", hint: "Silver nitrate + Sodium chloride", ans: "AgCl + NaNO₃", opts: ["AgCl + NaNO₃","AgNa + ClNO₃","Ag₂Cl + NO₂","NaAg + Cl₂"] },
+  ]},
+  { name: "Level 3 — Expert", short: "Level 3", questions: [
+    { r: "N₂ + 3H₂ → ?", hint: "Ammonia banane ki famous reaction!", ans: "2NH₃", opts: ["2NH₃","N₂H₄","NH₂","3NH"] },
+    { r: "2SO₂ + O₂ → ?", hint: "Sulfuric acid banane ka step", ans: "2SO₃", opts: ["2SO₃","S₂O₃","SO₄","2SO"] },
+    { r: "C₆H₁₂O₆ → 2C₂H₅OH + ?", hint: "Glucose fermentation!", ans: "2CO₂", opts: ["2CO₂","6H₂O","2CH₄","O₂"] },
+    { r: "2Na + 2H₂O → ?", hint: "Sodium paani mein daalte hain...", ans: "2NaOH + H₂", opts: ["2NaOH + H₂","Na₂O + H₂","NaH + OH","Na₂H + H₂O"] },
+    { r: "Fe₂O₃ + 3CO → ?", hint: "Iron ore se iron nikaalte hain!", ans: "2Fe + 3CO₂", opts: ["2Fe + 3CO₂","Fe₃O + CO","FeO + CO₂","2Fe₂O + CO₃"] },
+  ]}
+];
+
+let lvl = 0, q = 0, correct = 0, wrong = 0, answered = false;
+const total = levels.reduce((s,l)=>s+l.questions.length,0);
+
+function load() {
+  const L = levels[lvl], Q = L.questions[q];
+  document.getElementById('levelPill').textContent = L.short;
+  document.getElementById('reactionText').textContent = Q.r;
+  document.getElementById('hintText').textContent = Q.hint;
+  document.getElementById('sCorrect').textContent = correct;
+  document.getElementById('sWrong').textContent = wrong;
+  document.getElementById('sQ').textContent = (lvl*5+q+1)+"/"+total;
+  const pct = Math.round((lvl*5+q)/total*100);
+  document.getElementById('progFill').style.width = pct+'%';
+  document.getElementById('progPct').textContent = pct+'%';
+  document.getElementById('progLabel').textContent = L.name;
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('nextBtn').disabled = true;
+  answered = false;
+
+  const grid = document.getElementById('optGrid');
+  grid.innerHTML = '';
+  [...Q.opts].sort(()=>Math.random()-0.5).forEach(o => {
+    const b = document.createElement('button');
+    b.className = 'opt'; b.textContent = o;
+    b.onclick = () => check(o, Q.ans);
+    grid.appendChild(b);
+  });
+}
+
+function check(sel, ans) {
+  if (answered) return;
+  answered = true;
+  document.querySelectorAll('.opt').forEach(b => {
+    b.onclick = null;
+    if (b.textContent === ans) b.classList.add('correct');
+    else if (b.textContent === sel) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('feedback');
+  if (sel === ans) {
+    correct++;
+    fb.textContent = '✓ Sahi jawab! Ekdum perfect!';
+    fb.className = 'feedback correct';
+  } else {
+    wrong++;
+    fb.textContent = '✗ Galat! Sahi answer: ' + ans;
+    fb.className = 'feedback wrong';
+  }
+  document.getElementById('sCorrect').textContent = correct;
+  document.getElementById('sWrong').textContent = wrong;
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function nextQuestion() {
+  q++;
+  if (q >= levels[lvl].questions.length) {
+    if (lvl < levels.length - 1) { lvl++; q = 0; load(); }
+    else showEnd();
+  } else load();
+}
+
+function showEnd() {
+  const pct = Math.round(correct/total*100);
+  let emoji, msg;
+  if (pct >= 90) { emoji = '🏆'; msg = 'Waah bhai! Tum toh Chemistry ke ustaad ho! NEET/JEE crack karoge!'; }
+  else if (pct >= 70) { emoji = '🥳'; msg = 'Bahut accha kiya! Thoda aur practice karo, top aajaaoge!'; }
+  else if (pct >= 50) { emoji = '💪'; msg = 'Theek hai! Practice karte raho, chemistry mein zaroor maahir banoге!'; }
+  else { emoji = '📚'; msg = 'Koi baat nahi! Phir se try karo — har baar better hoga!'; }
+
+  document.getElementById('app').innerHTML = `
+    <div class="end-screen">
+      <div class="end-emoji">${emoji}</div>
+      <div class="end-title">Game Khatam!</div>
+      <div class="end-score-big">${correct}/${total}</div>
+      <div class="end-score-sub">${pct}% sahi jawab diye tumne</div>
+      <div class="end-msg">${msg}</div>
+      <button class="restart-btn" onclick="location.reload()">Phir se Khelein 🔄</button>
+    </div>`;
+}
+
+load();
+</script>
+</body>
+</html>
