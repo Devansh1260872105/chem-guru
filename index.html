@@ -6,323 +6,504 @@
 <title>Chem Guru — Chemistry Puzzle Game</title>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0e1a;
-    --surface: #111827;
-    --surface2: #1a2236;
-    --accent: #00e5a0;
-    --accent2: #00b8ff;
-    --danger: #ff4d6d;
-    --warning: #ffd60a;
-    --text: #f0f4ff;
-    --muted: #7a8caa;
-    --border: rgba(255,255,255,0.08);
-    --glow: 0 0 24px rgba(0,229,160,0.18);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Noto Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+:root {
+  --bg: #0a0e1a;
+  --surface: #111827;
+  --surface2: #1a2236;
+  --accent: #00e5a0;
+  --accent2: #00b8ff;
+  --danger: #ff4d6d;
+  --warning: #ffd60a;
+  --text: #f0f4ff;
+  --muted: #7a8caa;
+  --border: rgba(255,255,255,0.08);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image: linear-gradient(rgba(0,229,160,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,160,0.03) 1px, transparent 1px);
+  background-size: 40px 40px; pointer-events: none; z-index: 0;
+}
+.container { max-width: 480px; margin: auto; padding: 1.2rem 1rem 4rem; position: relative; z-index: 1; }
 
-  /* Background grid pattern */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(0,229,160,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,229,160,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
+/* LANG SCREEN */
+.lang-screen { text-align: center; padding: 2rem 0; animation: fadeIn 0.4s ease; }
+.logo-big { font-family: 'Baloo 2', cursive; font-size: 36px; font-weight: 800; background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 6px; }
+.logo-sub { font-size: 13px; color: var(--muted); margin-bottom: 2rem; }
+.lang-title { font-size: 15px; color: var(--muted); margin-bottom: 1rem; }
+.lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.5rem; }
+.lang-btn {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 14px 10px;
+  font-size: 15px; font-weight: 500; color: var(--text);
+  cursor: pointer; transition: all 0.15s; text-align: center;
+}
+.lang-btn:hover, .lang-btn.selected { border-color: var(--accent); background: rgba(0,229,160,0.08); color: var(--accent); }
+.start-btn {
+  width: 100%; padding: 14px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border: none; border-radius: 14px;
+  font-family: 'Baloo 2', cursive; font-size: 16px; font-weight: 700;
+  color: #0a0e1a; cursor: pointer; transition: opacity 0.2s;
+}
+.start-btn:hover { opacity: 0.9; }
+.start-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-  .container { max-width: 480px; margin: auto; padding: 1.5rem 1rem 4rem; position: relative; z-index: 1; }
+/* HEADER */
+.top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.logo { font-family: 'Baloo 2', cursive; font-size: 20px; font-weight: 800; background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.top-right { display: flex; gap: 8px; align-items: center; }
+.level-pill { font-size: 11px; font-weight: 600; letter-spacing: 1px; padding: 4px 10px; border-radius: 99px; border: 1px solid var(--accent); color: var(--accent); background: rgba(0,229,160,0.06); }
+.timer-pill { font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: 99px; border: 1px solid var(--warning); color: var(--warning); background: rgba(255,214,10,0.06); font-family: 'Baloo 2', cursive; min-width: 52px; text-align: center; }
+.timer-pill.danger { border-color: var(--danger); color: var(--danger); background: rgba(255,77,109,0.1); animation: pulse 0.5s infinite alternate; }
 
-  /* Header */
-  .top-bar {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 1.5rem;
-  }
-  .logo {
-    font-family: 'Baloo 2', cursive;
-    font-size: 22px; font-weight: 800;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  }
-  .logo span { font-size: 11px; font-weight: 500; display: block; -webkit-text-fill-color: var(--muted); margin-top: -4px; letter-spacing: 1px; }
-  .level-pill {
-    font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
-    padding: 4px 12px; border-radius: 99px;
-    border: 1px solid var(--accent); color: var(--accent);
-    background: rgba(0,229,160,0.06);
-  }
+/* SCORE ROW */
+.score-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin-bottom: 1rem; }
+.score-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 6px; text-align: center; }
+.score-card .val { font-family: 'Baloo 2', cursive; font-size: 18px; font-weight: 700; }
+.score-card .lbl { font-size: 9px; color: var(--muted); letter-spacing: 0.5px; margin-top: -2px; }
+.score-card.s-correct .val { color: var(--accent); }
+.score-card.s-wrong .val { color: var(--danger); }
+.score-card.s-total .val { color: var(--accent2); }
+.score-card.s-streak .val { color: var(--warning); }
 
-  /* Score cards */
-  .score-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 1.2rem; }
-  .score-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 12px; padding: 10px 8px; text-align: center;
-  }
-  .score-card .val { font-family: 'Baloo 2', cursive; font-size: 22px; font-weight: 700; }
-  .score-card .lbl { font-size: 10px; color: var(--muted); letter-spacing: 0.5px; margin-top: -2px; }
-  .score-card.s-correct .val { color: var(--accent); }
-  .score-card.s-wrong .val { color: var(--danger); }
-  .score-card.s-total .val { color: var(--accent2); }
+/* PROGRESS */
+.progress-wrap { margin-bottom: 1.2rem; }
+.progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 5px; }
+.progress-bg { height: 5px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+.progress-fill { height: 5px; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 99px; transition: width 0.4s ease; }
 
-  /* Progress */
-  .progress-wrap { margin-bottom: 1.4rem; }
-  .progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 6px; }
-  .progress-bg { height: 5px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
-  .progress-fill { height: 5px; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 99px; transition: width 0.4s ease; }
+/* QUESTION CARD */
+.q-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 1.4rem; margin-bottom: 1rem; position: relative; overflow: hidden; animation: fadeIn 0.3s ease; }
+.q-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+.q-tag { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.topic-badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: rgba(0,184,255,0.1); color: var(--accent2); border: 1px solid rgba(0,184,255,0.2); margin-bottom: 10px; }
+.reaction { font-family: 'Baloo 2', cursive; font-size: 26px; font-weight: 700; color: var(--text); text-align: center; margin: 8px 0 12px; letter-spacing: 1px; line-height: 1.3; }
+.hint-box { background: var(--surface2); border-radius: 10px; padding: 10px 14px; font-size: 13px; color: var(--muted); border-left: 3px solid var(--accent2); line-height: 1.5; }
+.hint-box strong { color: var(--accent2); }
 
-  /* Question card */
-  .q-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 1.5rem;
-    margin-bottom: 1.2rem;
-    position: relative;
-    overflow: hidden;
-  }
-  .q-card::before {
-    content: '';
-    position: absolute; top: 0; left: 0; right: 0; height: 3px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-  }
-  .q-tag {
-    font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
-    color: var(--muted); margin-bottom: 10px;
-  }
-  .reaction {
-    font-family: 'Baloo 2', cursive;
-    font-size: 28px; font-weight: 700;
-    color: var(--text); text-align: center;
-    margin: 10px 0 14px;
-    letter-spacing: 1px;
-    line-height: 1.3;
-  }
-  .hint-box {
-    background: var(--surface2);
-    border-radius: 10px; padding: 10px 14px;
-    font-size: 13px; color: var(--muted);
-    border-left: 3px solid var(--accent2);
-    line-height: 1.5;
-  }
-  .hint-box strong { color: var(--accent2); }
+/* OPTIONS */
+.options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+.opt { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px 10px; font-family: 'Baloo 2', cursive; font-size: 15px; font-weight: 600; color: var(--text); cursor: pointer; text-align: center; transition: all 0.15s; line-height: 1.3; }
+.opt:hover { border-color: rgba(0,229,160,0.4); background: rgba(0,229,160,0.05); transform: translateY(-1px); }
+.opt.correct { background: rgba(0,229,160,0.12); border-color: var(--accent); color: var(--accent); }
+.opt.wrong { background: rgba(255,77,109,0.12); border-color: var(--danger); color: var(--danger); }
 
-  /* Options */
-  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
-  .opt {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px; padding: 14px 10px;
-    font-family: 'Baloo 2', cursive;
-    font-size: 15px; font-weight: 600;
-    color: var(--text);
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.15s;
-    line-height: 1.3;
-  }
-  .opt:hover { border-color: rgba(0,229,160,0.4); background: rgba(0,229,160,0.05); transform: translateY(-1px); }
-  .opt.correct { background: rgba(0,229,160,0.12); border-color: var(--accent); color: var(--accent); }
-  .opt.wrong { background: rgba(255,77,109,0.12); border-color: var(--danger); color: var(--danger); }
+/* FEEDBACK */
+.feedback { text-align: center; font-size: 14px; font-weight: 600; min-height: 24px; margin-bottom: 0.8rem; padding: 6px; border-radius: 8px; transition: all 0.2s; }
+.feedback.correct { color: var(--accent); background: rgba(0,229,160,0.08); }
+.feedback.wrong { color: var(--danger); background: rgba(255,77,109,0.08); }
 
-  /* Feedback */
-  .feedback {
-    text-align: center; font-size: 14px; font-weight: 600;
-    min-height: 24px; margin-bottom: 1rem; padding: 6px;
-    border-radius: 8px; transition: all 0.2s;
-  }
-  .feedback.correct { color: var(--accent); background: rgba(0,229,160,0.08); }
-  .feedback.wrong { color: var(--danger); background: rgba(255,77,109,0.08); }
+/* STREAK POPUP */
+.streak-popup { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: linear-gradient(90deg, var(--warning), #ff9500); color: #000; font-family: 'Baloo 2', cursive; font-size: 16px; font-weight: 700; padding: 10px 24px; border-radius: 99px; z-index: 100; animation: popIn 0.3s ease; display: none; }
 
-  /* Next button */
-  .next-btn {
-    width: 100%; padding: 14px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    border: none; border-radius: 14px;
-    font-family: 'Baloo 2', cursive;
-    font-size: 16px; font-weight: 700;
-    color: #0a0e1a; cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s;
-    letter-spacing: 0.5px;
-  }
-  .next-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-  .next-btn:disabled { opacity: 0.25; cursor: not-allowed; transform: none; }
+/* NEXT BTN */
+.next-btn { width: 100%; padding: 14px; background: linear-gradient(90deg, var(--accent), var(--accent2)); border: none; border-radius: 14px; font-family: 'Baloo 2', cursive; font-size: 16px; font-weight: 700; color: #0a0e1a; cursor: pointer; transition: opacity 0.2s, transform 0.1s; }
+.next-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+.next-btn:disabled { opacity: 0.25; cursor: not-allowed; transform: none; }
 
-  /* End screen */
-  .end-screen { text-align: center; padding: 2rem 0.5rem; animation: fadeIn 0.5s ease; }
-  .end-emoji { font-size: 64px; margin-bottom: 1rem; }
-  .end-title { font-family: 'Baloo 2', cursive; font-size: 28px; font-weight: 800; margin-bottom: 8px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  }
-  .end-msg { font-size: 15px; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.6; }
-  .end-score-big {
-    font-family: 'Baloo 2', cursive; font-size: 56px; font-weight: 800;
-    color: var(--accent); margin: 0.5rem 0;
-  }
-  .end-score-sub { font-size: 13px; color: var(--muted); margin-bottom: 1.5rem; }
-  .restart-btn {
-    padding: 14px 36px;
-    background: transparent;
-    border: 1px solid var(--accent);
-    border-radius: 14px;
-    font-family: 'Baloo 2', cursive;
-    font-size: 16px; font-weight: 700;
-    color: var(--accent); cursor: pointer;
-    transition: all 0.2s;
-  }
-  .restart-btn:hover { background: rgba(0,229,160,0.1); transform: translateY(-1px); }
+/* LEADERBOARD */
+.lb-screen { animation: fadeIn 0.4s ease; }
+.lb-title { font-family: 'Baloo 2', cursive; font-size: 22px; font-weight: 800; background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 1rem; text-align: center; }
+.lb-input-row { display: flex; gap: 8px; margin-bottom: 1rem; }
+.lb-input { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; font-size: 14px; color: var(--text); outline: none; }
+.lb-input:focus { border-color: var(--accent); }
+.lb-save-btn { padding: 10px 18px; background: linear-gradient(90deg, var(--accent), var(--accent2)); border: none; border-radius: 10px; font-family: 'Baloo 2', cursive; font-weight: 700; font-size: 14px; color: #0a0e1a; cursor: pointer; }
+.lb-table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+.lb-table th { font-size: 11px; color: var(--muted); text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.lb-table td { font-size: 13px; padding: 10px 8px; border-bottom: 1px solid var(--border); color: var(--text); }
+.lb-table tr:first-child td { color: var(--warning); font-weight: 600; }
+.lb-table tr:nth-child(2) td { color: var(--muted); }
+.lb-rank { font-family: 'Baloo 2', cursive; font-weight: 700; }
+.play-again-btn { width: 100%; padding: 14px; background: transparent; border: 1px solid var(--accent); border-radius: 14px; font-family: 'Baloo 2', cursive; font-size: 16px; font-weight: 700; color: var(--accent); cursor: pointer; transition: all 0.2s; margin-top: 8px; }
+.play-again-btn:hover { background: rgba(0,229,160,0.08); }
 
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
-  .q-card { animation: fadeIn 0.3s ease; }
+/* END SCREEN */
+.end-screen { text-align: center; padding: 1.5rem 0; animation: fadeIn 0.5s ease; }
+.end-emoji { font-size: 56px; margin-bottom: 0.8rem; }
+.end-title { font-family: 'Baloo 2', cursive; font-size: 26px; font-weight: 800; background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 6px; }
+.end-score-big { font-family: 'Baloo 2', cursive; font-size: 52px; font-weight: 800; color: var(--accent); margin: 0.4rem 0; }
+.end-score-sub { font-size: 13px; color: var(--muted); margin-bottom: 0.8rem; }
+.end-msg { font-size: 14px; color: var(--muted); margin-bottom: 1.2rem; line-height: 1.6; }
+.end-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 1.2rem; }
+.end-stat { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px; text-align: center; }
+.end-stat .v { font-family: 'Baloo 2', cursive; font-size: 20px; font-weight: 700; color: var(--accent2); }
+.end-stat .l { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes pulse { from { opacity: 1; } to { opacity: 0.5; } }
+@keyframes popIn { from { opacity: 0; transform: translateX(-50%) scale(0.8); } to { opacity: 1; transform: translateX(-50%) scale(1); } }
 </style>
 </head>
 <body>
-<div class="container" id="app">
-
-  <div class="top-bar">
-    <div class="logo">⚗️ Chem Guru <span>Chemistry Puzzle Game</span></div>
-    <div class="level-pill" id="levelPill">Level 1</div>
-  </div>
-
-  <div class="score-row">
-    <div class="score-card s-correct"><div class="val" id="sCorrect">0</div><div class="lbl">Sahi ✓</div></div>
-    <div class="score-card s-wrong"><div class="val" id="sWrong">0</div><div class="lbl">Galat ✗</div></div>
-    <div class="score-card s-total"><div class="val" id="sQ">1/5</div><div class="lbl">Sawaal</div></div>
-  </div>
-
-  <div class="progress-wrap">
-    <div class="progress-label"><span id="progLabel">Shuruat</span><span id="progPct">0%</span></div>
-    <div class="progress-bg"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
-  </div>
-
-  <div class="q-card" id="qCard">
-    <div class="q-tag">Reaction kya banega?</div>
-    <div class="reaction" id="reactionText"></div>
-    <div class="hint-box"><strong>Hint:</strong> <span id="hintText"></span></div>
-  </div>
-
-  <div class="options" id="optGrid"></div>
-  <div class="feedback" id="feedback"></div>
-  <button class="next-btn" id="nextBtn" disabled onclick="nextQuestion()">Agla Sawaal →</button>
-
-</div>
+<div class="container" id="app"></div>
+<div class="streak-popup" id="streakPopup"></div>
 
 <script>
-const levels = [
-  { name: "Level 1 — Aasaan", short: "Level 1", questions: [
-    { r: "H₂ + O → ?", hint: "Yeh peene ka paani hai!", ans: "H₂O", opts: ["H₂O","CO₂","NaCl","O₂"] },
-    { r: "Na + Cl → ?", hint: "Khane mein daalte hain!", ans: "NaCl", opts: ["NaCl","KCl","HCl","NaOH"] },
-    { r: "C + O₂ → ?", hint: "Hum saans chodne par yahi nikalte hain", ans: "CO₂", opts: ["CO₂","H₂O","CH₄","SO₂"] },
-    { r: "Fe + O₂ → ?", hint: "Lohey pe paani padne par hota hai!", ans: "Fe₂O₃", opts: ["Fe₂O₃","FeS","FeCl₂","FeCO₃"] },
-    { r: "HCl + NaOH → ?", hint: "Acid aur base milenge toh...", ans: "NaCl + H₂O", opts: ["NaCl + H₂O","Na₂O + HCl","CO₂ + H₂","NaH + Cl₂"] },
-  ]},
-  { name: "Level 2 — Thoda Mushkil", short: "Level 2", questions: [
-    { r: "Zn + H₂SO₄ → ?", hint: "Zinc + Sulfuric acid!", ans: "ZnSO₄ + H₂", opts: ["ZnSO₄ + H₂","ZnO + H₂O","ZnCl₂ + SO₃","Zn₂S + H₂O"] },
-    { r: "CH₄ + 2O₂ → ?", hint: "Gas jalane par kya hota hai?", ans: "CO₂ + 2H₂O", opts: ["CO₂ + 2H₂O","CO + H₂O","CH₂ + O₃","C + H₂ + O₂"] },
-    { r: "CaCO₃ → CaO + ?", hint: "Limestone garam karo...", ans: "CO₂", opts: ["CO₂","O₂","Ca₂O","H₂O"] },
-    { r: "2H₂O₂ → 2H₂O + ?", hint: "Hydrogen peroxide toot-ta hai toh...", ans: "O₂", opts: ["O₂","H₂","H₂O₂","CO₂"] },
-    { r: "AgNO₃ + NaCl → ?", hint: "Silver nitrate + Sodium chloride", ans: "AgCl + NaNO₃", opts: ["AgCl + NaNO₃","AgNa + ClNO₃","Ag₂Cl + NO₂","NaAg + Cl₂"] },
-  ]},
-  { name: "Level 3 — Expert", short: "Level 3", questions: [
-    { r: "N₂ + 3H₂ → ?", hint: "Ammonia banane ki famous reaction!", ans: "2NH₃", opts: ["2NH₃","N₂H₄","NH₂","3NH"] },
-    { r: "2SO₂ + O₂ → ?", hint: "Sulfuric acid banane ka step", ans: "2SO₃", opts: ["2SO₃","S₂O₃","SO₄","2SO"] },
-    { r: "C₆H₁₂O₆ → 2C₂H₅OH + ?", hint: "Glucose fermentation!", ans: "2CO₂", opts: ["2CO₂","6H₂O","2CH₄","O₂"] },
-    { r: "2Na + 2H₂O → ?", hint: "Sodium paani mein daalte hain...", ans: "2NaOH + H₂", opts: ["2NaOH + H₂","Na₂O + H₂","NaH + OH","Na₂H + H₂O"] },
-    { r: "Fe₂O₃ + 3CO → ?", hint: "Iron ore se iron nikaalte hain!", ans: "2Fe + 3CO₂", opts: ["2Fe + 3CO₂","Fe₃O + CO","FeO + CO₂","2Fe₂O + CO₃"] },
-  ]}
+const LANGS = {
+  hindi:    { name: "हिंदी", flag: "🇮🇳", q: "प्रतिक्रिया क्या बनेगी?", hint: "संकेत", correct: "✓ सही जवाब!", wrong: "✗ गलत! सही उत्तर: ", next: "अगला सवाल →", levelWord: "स्तर", start: "खेलना शुरू करें", selectLang: "भाषा चुनें" },
+  english:  { name: "English", flag: "🇬🇧", q: "What is the product?", hint: "Hint", correct: "✓ Correct!", wrong: "✗ Wrong! Answer: ", next: "Next Question →", levelWord: "Level", start: "Start Game", selectLang: "Select Language" },
+  hinglish: { name: "Hinglish", flag: "🌟", q: "Reaction kya banega?", hint: "Hint", correct: "✓ Sahi jawab!", wrong: "✗ Galat! Sahi answer: ", next: "Agla Sawaal →", levelWord: "Level", start: "Game Shuru Karo", selectLang: "Bhasha Chunein" },
+  tamil:    { name: "தமிழ்", flag: "🌺", q: "என்ன உருவாகும்?", hint: "குறிப்பு", correct: "✓ சரியான பதில்!", wrong: "✗ தவறு! சரியான பதில்: ", next: "அடுத்த கேள்வி →", levelWord: "நிலை", start: "விளையாட்டு தொடங்கு", selectLang: "மொழி தேர்ந்தெடு" },
+  bengali:  { name: "বাংলা", flag: "🌸", q: "কী তৈরি হবে?", hint: "ইঙ্গিত", correct: "✓ সঠিক উত্তর!", wrong: "✗ ভুল! সঠিক উত্তর: ", next: "পরবর্তী প্রশ্ন →", levelWord: "স্তর", start: "খেলা শুরু করুন", selectLang: "ভাষা বেছে নিন" }
+};
+
+const ALL_QUESTIONS = [
+  // Level 1-3: Basic
+  { lvl:1, topic:"Basic", r:"H₂ + O → ?", hints:{hindi:"यह पीने का पानी है!",english:"This is drinking water!",hinglish:"Yeh peene ka paani hai!",tamil:"இது குடிநீர்!",bengali:"এটি পানীয় জল!"}, ans:"H₂O", opts:["H₂O","CO₂","NaCl","O₂"] },
+  { lvl:1, topic:"Basic", r:"Na + Cl → ?", hints:{hindi:"खाने में डालते हैं!",english:"We add this to food!",hinglish:"Khane mein daalte hain!",tamil:"உணவில் சேர்க்கிறோம்!",bengali:"খাবারে দেওয়া হয়!"}, ans:"NaCl", opts:["NaCl","KCl","HCl","NaOH"] },
+  { lvl:1, topic:"Basic", r:"C + O₂ → ?", hints:{hindi:"हम सांस छोड़ते समय यही निकालते हैं",english:"We exhale this gas",hinglish:"Hum saans chodne par yahi nikalte hain",tamil:"நாம் மூச்சு விடும்போது வெளியிடுகிறோம்",bengali:"আমরা শ্বাস ছাড়ার সময় এটি বের করি"}, ans:"CO₂", opts:["CO₂","H₂O","CH₄","SO₂"] },
+  { lvl:1, topic:"Basic", r:"Fe + O₂ → ?", hints:{hindi:"लोहे पर पानी पड़ने पर होता है!",english:"This happens when iron meets water!",hinglish:"Lohey pe paani padne par hota hai!",tamil:"இரும்பில் நீர் படும்போது!",bengali:"লোহায় জল পড়লে হয়!"}, ans:"Fe₂O₃", opts:["Fe₂O₃","FeS","FeCl₂","FeCO₃"] },
+  { lvl:1, topic:"Basic", r:"HCl + NaOH → ?", hints:{hindi:"अम्ल और क्षार मिलने पर...",english:"Acid + Base reaction",hinglish:"Acid aur base milenge toh...",tamil:"அமிலம் + காரம்",bengali:"অ্যাসিড + ক্ষার"}, ans:"NaCl + H₂O", opts:["NaCl + H₂O","Na₂O + HCl","CO₂ + H₂","NaH + Cl₂"] },
+
+  // Level 2
+  { lvl:2, topic:"Class 9", r:"Zn + H₂SO₄ → ?", hints:{hindi:"जिंक + सल्फ्यूरिक एसिड!",english:"Zinc + Sulfuric acid!",hinglish:"Zinc + Sulfuric acid!",tamil:"துத்தநாகம் + கந்தக அமிலம்!",bengali:"জিঙ্ক + সালফিউরিক অ্যাসিড!"}, ans:"ZnSO₄ + H₂", opts:["ZnSO₄ + H₂","ZnO + H₂O","ZnCl₂ + SO₃","Zn₂S + H₂O"] },
+  { lvl:2, topic:"Class 9", r:"CH₄ + 2O₂ → ?", hints:{hindi:"गैस जलाने पर क्या होता है?",english:"What happens when gas burns?",hinglish:"Gas jalane par kya hota hai?",tamil:"எரிவாயு எரியும்போது?",bengali:"গ্যাস জ্বললে কী হয়?"}, ans:"CO₂ + 2H₂O", opts:["CO₂ + 2H₂O","CO + H₂O","CH₂ + O₃","C + H₂ + O₂"] },
+  { lvl:2, topic:"Class 9", r:"CaCO₃ → CaO + ?", hints:{hindi:"चूना पत्थर गरम करो...",english:"Heat limestone...",hinglish:"Limestone garam karo...",tamil:"சுண்ணாம்புக் கல்லை சூடாக்கு...",bengali:"চুনাপাথর গরম করো..."}, ans:"CO₂", opts:["CO₂","O₂","Ca₂O","H₂O"] },
+  { lvl:2, topic:"Class 9", r:"2H₂O₂ → 2H₂O + ?", hints:{hindi:"हाइड्रोजन पेरॉक्साइड टूटता है",english:"Hydrogen peroxide decomposes",hinglish:"Hydrogen peroxide toot-ta hai",tamil:"ஹைட்ரஜன் பெராக்சைடு சிதைவு",bengali:"হাইড্রোজেন পারক্সাইড ভেঙে যায়"}, ans:"O₂", opts:["O₂","H₂","H₂O₂","CO₂"] },
+  { lvl:2, topic:"Class 9", r:"AgNO₃ + NaCl → ?", hints:{hindi:"सिल्वर नाइट्रेट + सोडियम क्लोराइड",english:"Silver nitrate + Sodium chloride",hinglish:"Silver nitrate + Sodium chloride",tamil:"வெள்ளி நைட்ரேட் + சோடியம் குளோரைடு",bengali:"সিলভার নাইট্রেট + সোডিয়াম ক্লোরাইড"}, ans:"AgCl + NaNO₃", opts:["AgCl + NaNO₃","AgNa + ClNO₃","Ag₂Cl + NO₂","NaAg + Cl₂"] },
+
+  // Level 3
+  { lvl:3, topic:"Class 10", r:"N₂ + 3H₂ → ?", hints:{hindi:"अमोनिया बनाने की प्रसिद्ध प्रतिक्रिया!",english:"Famous Haber process!",hinglish:"Ammonia banane ki famous reaction!",tamil:"ஹேபர் செயல்முறை!",bengali:"হেবার প্রক্রিয়া!"}, ans:"2NH₃", opts:["2NH₃","N₂H₄","NH₂","3NH"] },
+  { lvl:3, topic:"Class 10", r:"2SO₂ + O₂ → ?", hints:{hindi:"सल्फ्यूरिक एसिड बनाने का चरण",english:"Step in making sulfuric acid",hinglish:"Sulfuric acid banane ka step",tamil:"கந்தக அமிலம் தயாரிப்பு",bengali:"সালফিউরিক অ্যাসিড তৈরির ধাপ"}, ans:"2SO₃", opts:["2SO₃","S₂O₃","SO₄","2SO"] },
+  { lvl:3, topic:"Class 10", r:"C₆H₁₂O₆ → 2C₂H₅OH + ?", hints:{hindi:"ग्लूकोज किण्वन!",english:"Glucose fermentation!",hinglish:"Glucose fermentation!",tamil:"குளுக்கோஸ் நொதித்தல்!",bengali:"গ্লুকোজ গাঁজন!"}, ans:"2CO₂", opts:["2CO₂","6H₂O","2CH₄","O₂"] },
+  { lvl:3, topic:"Class 10", r:"2Na + 2H₂O → ?", hints:{hindi:"सोडियम पानी में डालते हैं...",english:"Sodium reacts with water...",hinglish:"Sodium paani mein daalte hain...",tamil:"சோடியம் நீரில் வினைபுரிகிறது...",bengali:"সোডিয়াম জলে যোগ করলে..."}, ans:"2NaOH + H₂", opts:["2NaOH + H₂","Na₂O + H₂","NaH + OH","Na₂H + H₂O"] },
+  { lvl:3, topic:"Class 10", r:"Fe₂O₃ + 3CO → ?", hints:{hindi:"लोहे के अयस्क से लोहा निकालते हैं!",english:"Iron extracted from ore!",hinglish:"Iron ore se iron nikaalte hain!",tamil:"தாதுவிலிருந்து இரும்பு பிரித்தெடுப்பு!",bengali:"আকরিক থেকে লোহা নিষ্কাশন!"}, ans:"2Fe + 3CO₂", opts:["2Fe + 3CO₂","Fe₃O + CO","FeO + CO₂","2Fe₂O + CO₃"] },
+
+  // Level 4
+  { lvl:4, topic:"Organic", r:"CH₃OH + O₂ → ?", hints:{hindi:"मेथेनॉल जलता है",english:"Methanol combustion",hinglish:"Methanol jalta hai",tamil:"மெத்தனால் எரிதல்",bengali:"মেথানল দহন"}, ans:"CO₂ + H₂O", opts:["CO₂ + H₂O","CO + H₂","CH₂O + O","C + H₂O"] },
+  { lvl:4, topic:"Organic", r:"C₂H₅OH + Na → ?", hints:{hindi:"इथेनॉल + सोडियम",english:"Ethanol + Sodium",hinglish:"Ethanol + Sodium",tamil:"எத்தனால் + சோடியம்",bengali:"ইথানল + সোডিয়াম"}, ans:"C₂H₅ONa + H₂", opts:["C₂H₅ONa + H₂","C₂H₄ + NaOH","C₂H₆ + Na₂O","CH₃Na + H₂O"] },
+  { lvl:4, topic:"Organic", r:"CH₃COOH + NaOH → ?", hints:{hindi:"सिरके का अम्ल + क्षार",english:"Acetic acid + base",hinglish:"Vinegar acid + base",tamil:"அசிட்டிக் அமிலம் + காரம்",bengali:"অ্যাসিটিক অ্যাসিড + ক্ষার"}, ans:"CH₃COONa + H₂O", opts:["CH₃COONa + H₂O","CH₃Na + CO₂","CH₄ + NaCO₃","CO₂ + NaH"] },
+  { lvl:4, topic:"Organic", r:"C₂H₄ + H₂ → ?", hints:{hindi:"एल्कीन + हाइड्रोजन",english:"Alkene + Hydrogen",hinglish:"Alkene + Hydrogen",tamil:"ஆல்கீன் + ஹைட்ரஜன்",bengali:"অ্যালকিন + হাইড্রোজেন"}, ans:"C₂H₆", opts:["C₂H₆","C₂H₄","C₃H₈","CH₄"] },
+  { lvl:4, topic:"Organic", r:"C₂H₂ + 2H₂ → ?", hints:{hindi:"एसिटिलीन का हाइड्रोजनीकरण",english:"Hydrogenation of acetylene",hinglish:"Acetylene ka hydrogenation",tamil:"அசிட்டிலீன் ஹைட்ரஜனேற்றம்",bengali:"অ্যাসিটিলিন হাইড্রোজিনেশন"}, ans:"C₂H₆", opts:["C₂H₆","C₂H₄","C₄H₄","C₂H₂"] },
+
+  // Level 5
+  { lvl:5, topic:"Acid-Base", r:"H₂SO₄ + 2NaOH → ?", hints:{hindi:"सल्फ्यूरिक एसिड + सोडियम हाइड्रॉक्साइड",english:"Sulfuric acid + Sodium hydroxide",hinglish:"Sulfuric acid + Sodium hydroxide",tamil:"கந்தக அமிலம் + சோடியம் ஹைட்ராக்சைடு",bengali:"সালফিউরিক অ্যাসিড + সোডিয়াম হাইড্রোক্সাইড"}, ans:"Na₂SO₄ + 2H₂O", opts:["Na₂SO₄ + 2H₂O","NaSO₃ + H₂","Na₂O + H₂SO₃","NaS + H₂O"] },
+  { lvl:5, topic:"Acid-Base", r:"CO₂ + H₂O → ?", hints:{hindi:"वर्षा जल का अम्लीय होना",english:"Why rainwater is acidic",hinglish:"Rainwater acidic kyun hoti hai",tamil:"மழை நீர் அமிலமாவது ஏன்",bengali:"বৃষ্টির জল কেন অম্লীয়"}, ans:"H₂CO₃", opts:["H₂CO₃","HCO₃","CO₃","H₂O₂"] },
+  { lvl:5, topic:"Acid-Base", r:"SO₃ + H₂O → ?", hints:{hindi:"सल्फर ट्राइऑक्साइड + पानी",english:"Sulfur trioxide + water",hinglish:"SO₃ + paani",tamil:"கந்தக ட்ரைஆக்சைடு + நீர்",bengali:"সালফার ট্রাইঅক্সাইড + জল"}, ans:"H₂SO₄", opts:["H₂SO₄","H₂SO₃","SO₂ + H₂","H₂S + O₃"] },
+  { lvl:5, topic:"Acid-Base", r:"Ca(OH)₂ + CO₂ → ?", hints:{hindi:"चूने का पानी + कार्बन डाइऑक्साइड",english:"Limewater + CO₂",hinglish:"Chune ka paani + CO₂",tamil:"சுண்ணாம்பு நீர் + CO₂",bengali:"চুনের জল + CO₂"}, ans:"CaCO₃ + H₂O", opts:["CaCO₃ + H₂O","Ca₂O + H₂CO₃","CaO + CO + H₂","CaH₂ + CO₃"] },
+  { lvl:5, topic:"Acid-Base", r:"NH₃ + HCl → ?", hints:{hindi:"अमोनिया + हाइड्रोक्लोरिक अम्ल",english:"Ammonia + Hydrochloric acid",hinglish:"Ammonia + HCl gas",tamil:"அம்மோனியா + ஹைட்ரோகுளோரிக் அமிலம்",bengali:"অ্যামোনিয়া + হাইড্রোক্লোরিক অ্যাসিড"}, ans:"NH₄Cl", opts:["NH₄Cl","N₂H₄","NH₂Cl","N₂ + H₂"] },
+
+  // Level 6
+  { lvl:6, topic:"Electrochemistry", r:"2H₂O → 2H₂ + ?", hints:{hindi:"पानी का विद्युत अपघटन",english:"Electrolysis of water",hinglish:"Paani ka electrolysis",tamil:"நீரின் மின்னாற்பகுப்பு",bengali:"জলের তড়িৎ বিশ্লেষণ"}, ans:"O₂", opts:["O₂","H₂O₂","2OH","O₃"] },
+  { lvl:6, topic:"Electrochemistry", r:"2NaCl + 2H₂O → 2NaOH + Cl₂ + ?", hints:{hindi:"क्लोर-क्षार प्रक्रिया",english:"Chlor-alkali process",hinglish:"Chlor-alkali process",tamil:"குளோர்-காரம் செயல்முறை",bengali:"ক্লোর-অ্যালকালি প্রক্রিয়া"}, ans:"H₂", opts:["H₂","O₂","HCl","Na"] },
+  { lvl:6, topic:"Electrochemistry", r:"Cu²⁺ + 2e⁻ → ?", hints:{hindi:"तांबे का जमाव",english:"Copper deposition",hinglish:"Copper deposit hota hai",tamil:"தாமிர வைப்பு",bengali:"তামার জমাট"}, ans:"Cu", opts:["Cu","Cu₂","CuO","Cu⁺"] },
+  { lvl:6, topic:"Electrochemistry", r:"Zn → Zn²⁺ + ?", hints:{hindi:"जिंक का ऑक्सीकरण",english:"Zinc oxidation at anode",hinglish:"Zinc oxidize hota hai",tamil:"துத்தநாக ஆக்சிகரணம்",bengali:"জিঙ্কের অক্সিডেশন"}, ans:"2e⁻", opts:["2e⁻","e⁻","O₂","H₂"] },
+  { lvl:6, topic:"Electrochemistry", r:"Pb + PbO₂ + 2H₂SO₄ → ?", hints:{hindi:"लेड एसिड बैटरी",english:"Lead acid battery reaction",hinglish:"Lead acid battery",tamil:"ஈய அமில மின்கலம்",bengali:"লিড অ্যাসিড ব্যাটারি"}, ans:"2PbSO₄ + 2H₂O", opts:["2PbSO₄ + 2H₂O","Pb₂SO₄ + H₂","PbO + H₂SO₃","2PbO + SO₂"] },
+
+  // Level 7
+  { lvl:7, topic:"Class 11", r:"2Mg + O₂ → ?", hints:{hindi:"मैग्नीशियम जलता है",english:"Magnesium burns",hinglish:"Magnesium jalta hai",tamil:"மெக்னீசியம் எரிகிறது",bengali:"ম্যাগনেসিয়াম জ্বলে"}, ans:"2MgO", opts:["2MgO","MgO₂","Mg₂O","MgO + O"] },
+  { lvl:7, topic:"Class 11", r:"P₄ + 5O₂ → ?", hints:{hindi:"फॉस्फोरस का दहन",english:"Phosphorus combustion",hinglish:"Phosphorus jalta hai",tamil:"பாஸ்பரஸ் எரிதல்",bengali:"ফসফরাসের দহন"}, ans:"P₄O₁₀", opts:["P₄O₁₀","PO₂","P₂O₅","P₄O₈"] },
+  { lvl:7, topic:"Class 11", r:"3Fe + 4H₂O → ?", hints:{hindi:"लोहे पर भाप की प्रतिक्रिया",english:"Iron + steam reaction",hinglish:"Iron pe steam ki reaction",tamil:"இரும்பு + நீராவி",bengali:"লোহা + বাষ্প বিক্রিয়া"}, ans:"Fe₃O₄ + 4H₂", opts:["Fe₃O₄ + 4H₂","FeO + H₂","Fe₂O₃ + H₂O","3FeO + H₂"] },
+  { lvl:7, topic:"Class 11", r:"2F₂ + 2H₂O → ?", hints:{hindi:"फ्लोरीन + पानी",english:"Fluorine + water",hinglish:"Fluorine + paani",tamil:"ஃப்ளோரின் + நீர்",bengali:"ফ্লোরিন + জল"}, ans:"4HF + O₂", opts:["4HF + O₂","HF + OH","2HF + H₂O₂","H₂F₂ + O"] },
+  { lvl:7, topic:"Class 11", r:"2Al + 6HCl → ?", hints:{hindi:"एल्युमिनियम + हाइड्रोक्लोरिक अम्ल",english:"Aluminium + hydrochloric acid",hinglish:"Aluminium + HCl",tamil:"அலுமினியம் + HCl",bengali:"অ্যালুমিনিয়াম + HCl"}, ans:"2AlCl₃ + 3H₂", opts:["2AlCl₃ + 3H₂","AlCl + H₂O","Al₂Cl + H₃","AlH₃ + Cl₂"] },
+
+  // Level 8
+  { lvl:8, topic:"Class 12", r:"CH₃CHO + [O] → ?", hints:{hindi:"एल्डिहाइड का ऑक्सीकरण",english:"Oxidation of aldehyde",hinglish:"Aldehyde ka oxidation",tamil:"ஆல்டிஹைட் ஆக்சிகரணம்",bengali:"অ্যালডিহাইডের অক্সিডেশন"}, ans:"CH₃COOH", opts:["CH₃COOH","CH₃OH","CO₂ + H₂","CH₄ + O₂"] },
+  { lvl:8, topic:"Class 12", r:"CH₃COOH + C₂H₅OH → ?", hints:{hindi:"एस्टरीकरण प्रतिक्रिया",english:"Esterification reaction",hinglish:"Esterification reaction",tamil:"எஸ்டரிஃபிகேஷன் வினை",bengali:"এস্টারিফিকেশন বিক্রিয়া"}, ans:"CH₃COOC₂H₅ + H₂O", opts:["CH₃COOC₂H₅ + H₂O","CH₃OH + C₂H₄","CH₄ + CO₂","C₂H₅COO + H"] },
+  { lvl:8, topic:"Class 12", r:"C₆H₅NO₂ + 3H₂ → ?", hints:{hindi:"नाइट्रोबेंजीन का अपचयन",english:"Reduction of nitrobenzene",hinglish:"Nitrobenzene ka reduction",tamil:"நைட்ரோபென்சீன் குறைப்பு",bengali:"নাইট্রোবেনজিনের বিজারণ"}, ans:"C₆H₅NH₂ + 2H₂O", opts:["C₆H₅NH₂ + 2H₂O","C₆H₅OH + N₂","C₆H₆ + NO₂","C₆H₄N₂ + H₂O"] },
+  { lvl:8, topic:"Class 12", r:"2CH₃OH + O₂ → ?", hints:{hindi:"मेथेनॉल का ऑक्सीकरण",english:"Methanol oxidation",hinglish:"Methanol oxidize hota hai",tamil:"மெத்தனால் ஆக்சிகரணம்",bengali:"মেথানলের অক্সিডেশন"}, ans:"2HCHO + 2H₂O", opts:["2HCHO + 2H₂O","2CO₂ + H₂","CH₃OH + O","2CH₂O₂"] },
+  { lvl:8, topic:"Class 12", r:"C₆H₅CH₃ + Cl₂ → ?", hints:{hindi:"टोल्युइन + क्लोरीन (प्रकाश में)",english:"Toluene + Chlorine (light)",hinglish:"Toluene + Cl₂ in light",tamil:"டோலுயீன் + குளோரின்",bengali:"টলুইন + ক্লোরিন"}, ans:"C₆H₅CH₂Cl + HCl", opts:["C₆H₅CH₂Cl + HCl","C₆H₄ClCH₃ + H","C₆H₅Cl + CH₃","C₆H₅ + CH₂Cl₂"] },
+
+  // Level 9
+  { lvl:9, topic:"NEET Level", r:"ATP → ADP + ?", hints:{hindi:"ऊर्जा मुद्रा का टूटना",english:"Energy currency breakdown",hinglish:"Energy currency toot-ta hai",tamil:"ஆற்றல் நாணயம் உடைகிறது",bengali:"শক্তির মুদ্রা ভাঙে"}, ans:"Pi + Energy", opts:["Pi + Energy","Pi + H₂O","AMP + CO₂","H₂ + CO₂"] },
+  { lvl:9, topic:"NEET Level", r:"6CO₂ + 6H₂O → C₆H₁₂O₆ + ?", hints:{hindi:"प्रकाश संश्लेषण",english:"Photosynthesis reaction",hinglish:"Photosynthesis",tamil:"ஒளிச்சேர்க்கை",bengali:"সালোকসংশ্লেষণ"}, ans:"6O₂", opts:["6O₂","CO₂","H₂O₂","6H₂"] },
+  { lvl:9, topic:"NEET Level", r:"Glucose + O₂ → CO₂ + H₂O + ?", hints:{hindi:"कोशिकीय श्वसन",english:"Cellular respiration",hinglish:"Cellular respiration",tamil:"செல் சுவாசம்",bengali:"কোষীয় শ্বসন"}, ans:"ATP", opts:["ATP","ADP","RNA","NADH"] },
+  { lvl:9, topic:"NEET Level", r:"HNO₃ + Cu → Cu(NO₃)₂ + H₂O + ?", hints:{hindi:"तांबा + सांद्र नाइट्रिक अम्ल",english:"Copper + conc. nitric acid",hinglish:"Copper + conc. HNO₃",tamil:"தாமிரம் + HNO₃",bengali:"তামা + গাঢ় HNO₃"}, ans:"NO₂", opts:["NO₂","NO","N₂O","N₂"] },
+  { lvl:9, topic:"NEET Level", r:"2KClO₃ → 2KCl + ?", hints:{hindi:"पोटैशियम क्लोरेट का अपघटन",english:"Decomposition of KClO₃",hinglish:"KClO₃ ka decomposition",tamil:"KClO₃ சிதைவு",bengali:"KClO₃ এর বিভাজন"}, ans:"3O₂", opts:["3O₂","O₃","Cl₂ + O₂","2O₂"] },
+
+  // Level 10
+  { lvl:10, topic:"JEE Level", r:"2H₂S + SO₂ → 3S + ?", hints:{hindi:"क्लॉस प्रक्रिया",english:"Claus process",hinglish:"Claus process",tamil:"கிளாஸ் செயல்முறை",bengali:"ক্লাউস প্রক্রিয়া"}, ans:"2H₂O", opts:["2H₂O","H₂SO₄","SO₃ + H₂","H₂ + SO₃"] },
+  { lvl:10, topic:"JEE Level", r:"XeF₄ + H₂O → Xe + HF + ?", hints:{hindi:"ज़ेनॉन टेट्राफ्लोराइड हाइड्रोलिसिस",english:"Xenon tetrafluoride hydrolysis",hinglish:"XeF₄ ka hydrolysis",tamil:"XeF₄ நீரேற்றம்",bengali:"XeF₄ এর হাইড্রোলাইসিস"}, ans:"O₂", opts:["O₂","HXeO","XeO₂","H₂Xe"] },
+  { lvl:10, topic:"JEE Level", r:"PCl₅ → PCl₃ + ?", hints:{hindi:"फॉस्फोरस पेंटाक्लोराइड का अपघटन",english:"PCl₅ decomposition",hinglish:"PCl₅ toot-ta hai",tamil:"PCl₅ சிதைவு",bengali:"PCl₅ এর বিভাজন"}, ans:"Cl₂", opts:["Cl₂","2Cl","PCl₂","Cl₃"] },
+  { lvl:10, topic:"JEE Level", r:"Cr₂O₇²⁻ + 14H⁺ + 6e⁻ → 2Cr³⁺ + ?", hints:{hindi:"डाइक्रोमेट का अपचयन",english:"Dichromate reduction",hinglish:"Dichromate ka reduction",tamil:"டைக்ரோமேட் குறைப்பு",bengali:"ডাইক্রোমেটের বিজারণ"}, ans:"7H₂O", opts:["7H₂O","6H₂O","14OH","H₂O₂"] },
+  { lvl:10, topic:"JEE Level", r:"2MnO₄⁻ + 5C₂O₄²⁻ + 16H⁺ → 2Mn²⁺ + 10CO₂ + ?", hints:{hindi:"KMnO₄ का ऑक्सीकरण",english:"KMnO₄ oxidation titration",hinglish:"KMnO₄ titration",tamil:"KMnO₄ ஆக்சிகரண டைட்ரேஷன்",bengali:"KMnO₄ টাইট্রেশন"}, ans:"8H₂O", opts:["8H₂O","16H₂O","4H₂O","H₂O₂"] },
+
+  // Levels 11-30 (5 questions each, mixed topics)
+  ...[
+    { lvl:11, topic:"Thermochemistry", r:"C + O₂ → CO₂ + ?", hints:{hindi:"ऊष्माक्षेपी प्रतिक्रिया",english:"Exothermic reaction",hinglish:"Exothermic reaction",tamil:"வெப்பமளிக்கும் வினை",bengali:"তাপ উৎপাদী বিক্রিয়া"}, ans:"Heat", opts:["Heat","Cold","Light","Sound"] },
+    { lvl:11, topic:"Thermochemistry", r:"N₂ + O₂ → 2NO - ?", hints:{hindi:"ऊष्माशोषी प्रतिक्रिया",english:"Endothermic reaction",hinglish:"Endothermic reaction",tamil:"வெப்பம் உறிஞ்சும் வினை",bengali:"তাপশোষী বিক্রিয়া"}, ans:"Heat", opts:["Heat","Energy","Light","CO₂"] },
+    { lvl:11, topic:"Polymers", r:"nCH₂=CH₂ → ?", hints:{hindi:"पॉलीथीन बनती है",english:"Polyethylene formation",hinglish:"Polyethylene banti hai",tamil:"பாலித்தீன் உருவாகிறது",bengali:"পলিইথিলিন তৈরি হয়"}, ans:"(CH₂-CH₂)ₙ", opts:["(CH₂-CH₂)ₙ","C₂H₄ₙ","CH₄ + Hₙ","(CH₃)ₙ"] },
+    { lvl:11, topic:"Polymers", r:"nCH₂=CHCl → ?", hints:{hindi:"पीवीसी बनती है",english:"PVC formation",hinglish:"PVC banta hai",tamil:"PVC உருவாகிறது",bengali:"PVC তৈরি হয়"}, ans:"(CH₂-CHCl)ₙ", opts:["(CH₂-CHCl)ₙ","CHClₙ","(CHCl)ₙ","C₂H₃Clₙ"] },
+    { lvl:11, topic:"Nuclear", r:"²³⁵U + n → Ba + Kr + ?", hints:{hindi:"परमाणु विखंडन",english:"Nuclear fission",hinglish:"Nuclear fission",tamil:"அணுக்கரு பிளவு",bengali:"পারমাণবিক বিভাজন"}, ans:"3n + Energy", opts:["3n + Energy","2n","He + Energy","H₂ + n"] },
+  ],
+  ...[
+    { lvl:12, topic:"Coordination", r:"[Fe(CN)₆]³⁻ + e⁻ → ?", hints:{hindi:"हेक्सासायनोफेरेट का अपचयन",english:"Hexacyanoferrate reduction",hinglish:"Fe complex ka reduction",tamil:"ஹெக்ஸாசயனோஃபெர்ரேட் குறைப்பு",bengali:"হেক্সাসায়ানোফেরেট বিজারণ"}, ans:"[Fe(CN)₆]⁴⁻", opts:["[Fe(CN)₆]⁴⁻","[Fe(CN)₅]²⁻","Fe²⁺ + CN⁻","[Fe(CN)₄]⁻"] },
+    { lvl:12, topic:"Coordination", r:"AgCl + 2NH₃ → ?", hints:{hindi:"सिल्वर क्लोराइड + अमोनिया",english:"Silver chloride + Ammonia",hinglish:"AgCl + NH₃",tamil:"AgCl + அம்மோனியா",bengali:"AgCl + অ্যামোনিয়া"}, ans:"[Ag(NH₃)₂]⁺ + Cl⁻", opts:["[Ag(NH₃)₂]⁺ + Cl⁻","AgNH₃ + HCl","Ag + NH₄Cl","AgNH₂ + HCl"] },
+    { lvl:12, topic:"Isomerism", r:"C₄H₁₀ isomers → ?", hints:{hindi:"ब्यूटेन के आइसोमर",english:"Butane isomers count",hinglish:"Butane ke kitne isomers",tamil:"ப்யூட்டேன் ஐசோமர்கள்",bengali:"বিউটেনের আইসোমার"}, ans:"2", opts:["2","3","4","1"] },
+    { lvl:12, topic:"Redox", r:"MnO₄⁻ + Fe²⁺ + H⁺ → Mn²⁺ + Fe³⁺ + ?", hints:{hindi:"परमैंगनेट द्वारा आयरन का ऑक्सीकरण",english:"Permanganate oxidizing iron",hinglish:"Permanganate + iron",tamil:"பர்மாங்கனேட் + இரும்பு",bengali:"পারমাঙ্গানেট + আয়রন"}, ans:"H₂O", opts:["H₂O","OH⁻","H₂","O₂"] },
+    { lvl:12, topic:"Redox", r:"Cr₂O₇²⁻ + C₂H₅OH → ?", hints:{hindi:"डाइक्रोमेट + इथेनॉल",english:"Dichromate oxidizes ethanol",hinglish:"Dichromate + ethanol",tamil:"டைக்ரோமேட் + எத்தனால்",bengali:"ডাইক্রোমেট + ইথানল"}, ans:"CH₃COOH + Cr³⁺", opts:["CH₃COOH + Cr³⁺","CO₂ + Cr²⁺","CH₃CHO + Cr","HCOOH + Cr³⁺"] },
+  ],
+  ...[
+    { lvl:13, topic:"Photochemistry", r:"2AgBr → 2Ag + ?", hints:{hindi:"प्रकाश की उपस्थिति में",english:"In presence of light",hinglish:"Light mein AgBr toot-ta hai",tamil:"ஒளி முன்னிலையில்",bengali:"আলোর উপস্থিতিতে"}, ans:"Br₂", opts:["Br₂","Br⁻","AgBr","O₂"] },
+    { lvl:13, topic:"Photochemistry", r:"O₃ + UV → O₂ + ?", hints:{hindi:"ओजोन का विघटन",english:"Ozone layer depletion",hinglish:"Ozone toot-ta hai",tamil:"ஓசோன் சிதைவு",bengali:"ওজোন স্তর ক্ষয়"}, ans:"O", opts:["O","O₂","O₄","OH"] },
+    { lvl:13, topic:"Surface", r:"2SO₂ + O₂ →(V₂O₅)→ ?", hints:{hindi:"वैनेडियम उत्प्रेरक के साथ",english:"Vanadium catalyst Contact process",hinglish:"V₂O₅ catalyst ke saath",tamil:"வனேடியம் xúc tác",bengali:"ভ্যানাডিয়াম অনুঘটক সহ"}, ans:"2SO₃", opts:["2SO₃","SO₄","S₂O₃","SO₂"] },
+    { lvl:13, topic:"Metals", r:"2Al + Fe₂O₃ → Al₂O₃ + ?", hints:{hindi:"थर्माइट प्रतिक्रिया",english:"Thermite reaction",hinglish:"Thermite reaction",tamil:"தர்மைட் வினை",bengali:"থার্মাইট বিক্রিয়া"}, ans:"2Fe", opts:["2Fe","FeO","Fe₃O₄","Fe₂Al"] },
+    { lvl:13, topic:"Metals", r:"Cu + 2AgNO₃ → Cu(NO₃)₂ + ?", hints:{hindi:"विस्थापन प्रतिक्रिया",english:"Displacement reaction",hinglish:"Displacement reaction",tamil:"இடப்பெயர்ச்சி வினை",bengali:"প্রতিস্থাপন বিক্রিয়া"}, ans:"2Ag", opts:["2Ag","Ag₂O","AgCu","Ag₂NO₃"] },
+  ],
+  ...[
+    { lvl:14, topic:"Biochemistry", r:"Glucose + 6O₂ → ?", hints:{hindi:"एरोबिक श्वसन",english:"Aerobic respiration",hinglish:"Aerobic respiration",tamil:"காற்றோட்ட சுவாசம்",bengali:"অ্যারোবিক শ্বসন"}, ans:"6CO₂ + 6H₂O + ATP", opts:["6CO₂ + 6H₂O + ATP","CO₂ + H₂O","6CO₂ + ATP","6H₂O + Energy"] },
+    { lvl:14, topic:"Biochemistry", r:"Starch + H₂O →(amylase)→ ?", hints:{hindi:"स्टार्च का पाचन",english:"Starch digestion",hinglish:"Starch digest hota hai",tamil:"மாவுச்சத்து செரிமானம்",bengali:"স্টার্চ হজম"}, ans:"Glucose", opts:["Glucose","Fructose","Maltose","Sucrose"] },
+    { lvl:14, topic:"Biochemistry", r:"Amino acids + ?→ Protein", hints:{hindi:"पेप्टाइड बंध बनता है",english:"Peptide bond formation",hinglish:"Peptide bond banta hai",tamil:"பெப்டைட் பந்தம்",bengali:"পেপটাইড বন্ধন"}, ans:"Peptide bond", opts:["Peptide bond","H₂O","CO₂","ATP"] },
+    { lvl:14, topic:"Biochemistry", r:"DNA → mRNA + ?", hints:{hindi:"प्रतिलेखन प्रक्रिया",english:"Transcription process",hinglish:"Transcription",tamil:"டிரான்ஸ்கிரிப்ஷன்",bengali:"ট্রান্সক্রিপশন"}, ans:"Energy (ATP)", opts:["Energy (ATP)","tRNA","Protein","Ribosome"] },
+    { lvl:14, topic:"Environmental", r:"CO + O₃ → CO₂ + ?", hints:{hindi:"ओजोन + कार्बन मोनोऑक्साइड",english:"Ozone + carbon monoxide",hinglish:"Ozone + CO",tamil:"ஓசோன் + கார்பன் மோனாக்சைடு",bengali:"ওজোন + কার্বন মনোক্সাইড"}, ans:"O₂", opts:["O₂","O","CO₃","O₂ + CO₂"] },
+  ],
+  ...[
+    { lvl:15, topic:"Advanced Organic", r:"C₆H₅OH + NaOH → ?", hints:{hindi:"फिनॉल + सोडियम हाइड्रॉक्साइड",english:"Phenol + NaOH",hinglish:"Phenol + NaOH",tamil:"ஃபீனால் + NaOH",bengali:"ফেনল + NaOH"}, ans:"C₆H₅ONa + H₂O", opts:["C₆H₅ONa + H₂O","C₆H₄(OH)₂","C₆H₅Na + OH","NaC₆H₄ + H₂O"] },
+    { lvl:15, topic:"Advanced Organic", r:"CH₃Cl + NaOH(aq) → ?", hints:{hindi:"हाइड्रोलिसिस प्रतिक्रिया",english:"Hydrolysis reaction",hinglish:"Hydrolysis",tamil:"நீரேற்றம்",bengali:"হাইড্রোলাইসিস"}, ans:"CH₃OH + NaCl", opts:["CH₃OH + NaCl","CH₂ + NaOCl","CH₄ + NaCl","CH₃Na + HCl"] },
+    { lvl:15, topic:"Advanced Organic", r:"C₂H₅Br + KOH(alc) → ?", hints:{hindi:"विलोपन प्रतिक्रिया",english:"Elimination reaction",hinglish:"Elimination reaction",tamil:"நீக்கல் வினை",bengali:"বিলুপ্তি বিক্রিয়া"}, ans:"C₂H₄ + KBr + H₂O", opts:["C₂H₄ + KBr + H₂O","C₂H₅OH + KBr","C₂H₆ + KBr","C₂H₄Br + KOH"] },
+    { lvl:15, topic:"Advanced Organic", r:"CH₃CHO + HCN → ?", hints:{hindi:"नाभिकस्नेही योग",english:"Nucleophilic addition",hinglish:"Nucleophilic addition",tamil:"நியூக்ளியோஃபிலிக் கூட்டல்",bengali:"নিউক্লিওফিলিক যোগ"}, ans:"CH₃CH(OH)CN", opts:["CH₃CH(OH)CN","CH₃CHCN","CH₃COOH","CH₃CN + H₂O"] },
+    { lvl:15, topic:"Advanced Organic", r:"C₆H₆ + Br₂ →(FeBr₃)→ ?", hints:{hindi:"बेंजीन का ब्रोमिनेशन",english:"Bromination of benzene",hinglish:"Benzene ka bromination",tamil:"பென்சீன் புரோமினேஷன்",bengali:"বেনজিনের ব্রোমিনেশন"}, ans:"C₆H₅Br + HBr", opts:["C₆H₅Br + HBr","C₆H₆Br₂","C₆H₄Br₂ + H₂","C₆H₅ + Br₂"] },
+  ],
 ];
 
-let lvl = 0, q = 0, correct = 0, wrong = 0, answered = false;
-const total = levels.reduce((s,l)=>s+l.questions.length,0);
+// Fill remaining levels 16-30 with generated questions
+const extraQs = [
+  { lvl:16, topic:"Inorganic", r:"3Cl₂ + 6NaOH → 5NaCl + NaClO₃ + ?", hints:{hindi:"क्लोरीन + गरम NaOH",english:"Cl₂ + hot NaOH",hinglish:"Cl₂ + hot NaOH",tamil:"Cl₂ + சூடான NaOH",bengali:"Cl₂ + গরম NaOH"}, ans:"3H₂O", opts:["3H₂O","H₂","Cl₂O","HCl"] },
+  { lvl:16, topic:"Inorganic", r:"P₄ + 3NaOH + 3H₂O → PH₃ + ?", hints:{hindi:"फॉस्फिन बनाना",english:"Phosphine formation",hinglish:"Phosphine banta hai",tamil:"ஃபாஸ்ஃபைன் உருவாகிறது",bengali:"ফসফাইন তৈরি"}, ans:"3NaH₂PO₂", opts:["3NaH₂PO₂","Na₃PO₄","NaPH₂","Na₂HPO₃"] },
+  { lvl:16, topic:"Inorganic", r:"Si + 2NaOH + H₂O → Na₂SiO₃ + ?", hints:{hindi:"सिलिकॉन + NaOH",english:"Silicon + NaOH",hinglish:"Silicon + NaOH",tamil:"சிலிக்கான் + NaOH",bengali:"সিলিকন + NaOH"}, ans:"2H₂", opts:["2H₂","H₂O","SiH₄","H₂O₂"] },
+  { lvl:16, topic:"Inorganic", r:"B₂H₆ + 6H₂O → 2B(OH)₃ + ?", hints:{hindi:"डाइबोरेन का जल-अपघटन",english:"Diborane hydrolysis",hinglish:"Diborane ka hydrolysis",tamil:"டைபோரேன் நீரேற்றம்",bengali:"ডাইবোরেনের হাইড্রোলাইসিস"}, ans:"6H₂", opts:["6H₂","3H₂","B₂O₃","BH₄"] },
+  { lvl:16, topic:"Inorganic", r:"2NO + O₂ → ?", hints:{hindi:"NO का ऑक्सीकरण",english:"Oxidation of NO",hinglish:"NO oxidize hota hai",tamil:"NO ஆக்சிகரணம்",bengali:"NO এর অক্সিডেশন"}, ans:"2NO₂", opts:["2NO₂","N₂O₄","N₂ + O₃","2N + 2O₂"] },
+  { lvl:17, topic:"Spectroscopy", r:"H atom: n=3 → n=1, emission = ?", hints:{hindi:"लाइमन श्रृंखला",english:"Lyman series emission",hinglish:"Lyman series",tamil:"லைமன் தொடர்",bengali:"লাইম্যান সিরিজ"}, ans:"UV photon", opts:["UV photon","Visible light","IR","X-ray"] },
+  { lvl:17, topic:"Spectroscopy", r:"H atom: n=4 → n=2 gives?", hints:{hindi:"बाल्मर श्रृंखला",english:"Balmer series",hinglish:"Balmer series",tamil:"பால்மர் தொடர்",bengali:"বালমার সিরিজ"}, ans:"Visible light", opts:["Visible light","UV","IR","X-ray"] },
+  { lvl:17, topic:"Gas Laws", r:"PV = nRT, if T doubles, P = ?", hints:{hindi:"आदर्श गैस नियम",english:"Ideal gas law",hinglish:"Ideal gas law",tamil:"சிறந்த வாயு விதி",bengali:"আদর্শ গ্যাস সূত্র"}, ans:"2P (doubles)", opts:["2P (doubles)","P/2","4P","P"] },
+  { lvl:17, topic:"Gas Laws", r:"Graham's Law: rate ∝ ?", hints:{hindi:"ग्राहम का विसरण नियम",english:"Graham's law of diffusion",hinglish:"Graham's law",tamil:"கிரஹாமின் விதி",bengali:"গ্রাহামের সূত্র"}, ans:"1/√M", opts:["1/√M","M","√M","1/M"] },
+  { lvl:17, topic:"Solutions", r:"ΔTb = Kb × ?", hints:{hindi:"क्वथनांक उन्नयन",english:"Boiling point elevation",hinglish:"Boiling point elevation",tamil:"கொதிநிலை உயர்வு",bengali:"স্ফুটনাঙ্ক উন্নয়ন"}, ans:"m (molality)", opts:["m (molality)","M (molarity)","moles","density"] },
+  { lvl:18, topic:"Equilibrium", r:"N₂ + 3H₂ ⇌ 2NH₃, Kc = ?", hints:{hindi:"हेबर प्रक्रिया का संतुलन",english:"Haber process equilibrium",hinglish:"Equilibrium constant",tamil:"சமநிலை மாறிலி",bengali:"সাম্যস্থিরাঙ্ক"}, ans:"[NH₃]²/[N₂][H₂]³", opts:["[NH₃]²/[N₂][H₂]³","[N₂][H₂]³/[NH₃]²","[NH₃]/[N₂][H₂]","[N₂][H₂]/[NH₃]"] },
+  { lvl:18, topic:"Equilibrium", r:"Le Chatelier: add N₂ to N₂+H₂⇌NH₃?", hints:{hindi:"ले शतेलियर का सिद्धांत",english:"Le Chatelier's principle",hinglish:"Le Chatelier principle",tamil:"லு சட்டேலியர் கொள்கை",bengali:"লে শাতেলিয়ের নীতি"}, ans:"Shift right (more NH₃)", opts:["Shift right (more NH₃)","Shift left","No change","Kc changes"] },
+  { lvl:18, topic:"Ionic", r:"pH of 0.01M HCl = ?", hints:{hindi:"pH गणना",english:"pH calculation",hinglish:"pH calculate karo",tamil:"pH கணக்கீடு",bengali:"pH গণনা"}, ans:"2", opts:["2","1","3","4"] },
+  { lvl:18, topic:"Ionic", r:"Kw = [H⁺][OH⁻] at 25°C = ?", hints:{hindi:"पानी का आयन गुणनफल",english:"Ionic product of water",hinglish:"Water ka ionic product",tamil:"நீரின் அயனி பெருக்கல்",bengali:"জলের আয়নিক গুণফল"}, ans:"10⁻¹⁴", opts:["10⁻¹⁴","10⁻⁷","10⁻¹⁰","10⁻¹²"] },
+  { lvl:18, topic:"Ionic", r:"Buffer: CH₃COOH + CH₃COONa, adding HCl?", hints:{hindi:"बफर घोल का कार्य",english:"Buffer resists pH change",hinglish:"Buffer pH change resist karta hai",tamil:"இடையக கரைசல்",bengali:"বাফার দ্রবণ"}, ans:"pH stays ~constant", opts:["pH stays ~constant","pH drops sharply","pH rises","No reaction"] },
+  { lvl:19, topic:"Quantum", r:"Aufbau: after 3d, fill → ?", hints:{hindi:"ऑफबाऊ सिद्धांत",english:"Aufbau principle",hinglish:"Aufbau principle",tamil:"ஆஃப்பாவ் கொள்கை",bengali:"অউফবাউ নীতি"}, ans:"4p", opts:["4p","4s","3f","5s"] },
+  { lvl:19, topic:"Quantum", r:"Max electrons in d-subshell = ?", hints:{hindi:"d कक्षक की अधिकतम क्षमता",english:"d subshell capacity",hinglish:"d subshell mein max electrons",tamil:"d துணை-ஷெல் திறன்",bengali:"d উপকক্ষের সর্বোচ্চ ইলেকট্রন"}, ans:"10", opts:["10","6","14","8"] },
+  { lvl:19, topic:"Quantum", r:"Heisenberg: Δx·Δp ≥ ?", hints:{hindi:"अनिश्चितता सिद्धांत",english:"Uncertainty principle",hinglish:"Heisenberg uncertainty",tamil:"நிச்சயமற்ற தத்துவம்",bengali:"অনিশ্চয়তা নীতি"}, ans:"h/4π", opts:["h/4π","h/2π","h","h/π"] },
+  { lvl:19, topic:"Quantum", r:"Hund's rule: degenerate orbitals fill?", hints:{hindi:"हुंड का नियम",english:"Hund's rule",hinglish:"Hund's rule",tamil:"ஹண்டின் விதி",bengali:"হুন্ডের নিয়ম"}, ans:"Singly first", opts:["Singly first","Doubly first","Randomly","Alternately"] },
+  { lvl:19, topic:"Quantum", r:"de Broglie: λ = h/?", hints:{hindi:"दे ब्रोगली तरंगदैर्ध्य",english:"de Broglie wavelength",hinglish:"de Broglie wavelength",tamil:"டி பிரோலி அலைநீளம்",bengali:"ডি ব্রোগলি তরঙ্গদৈর্ঘ্য"}, ans:"mv", opts:["mv","m","v","m²v"] },
+  { lvl:20, topic:"Master", r:"Nernst eq: E = E° - (RT/nF)ln?", hints:{hindi:"नर्नस्ट समीकरण",english:"Nernst equation",hinglish:"Nernst equation",tamil:"நெர்ன்ஸ்ட் சமன்பாடு",bengali:"নার্নস্ট সমীকরণ"}, ans:"Q (reaction quotient)", opts:["Q (reaction quotient)","K","Ksp","pH"] },
+  { lvl:20, topic:"Master", r:"Faraday 1st law: m ∝ ?", hints:{hindi:"फैराडे का प्रथम नियम",english:"Faraday's first law",hinglish:"Faraday's first law",tamil:"ஃபாரடேயின் முதல் விதி",bengali:"ফ্যারাডের প্রথম সূত্র"}, ans:"Q (charge)", opts:["Q (charge)","Voltage","Time only","Current only"] },
+  { lvl:20, topic:"Master", r:"Van't Hoff factor i for NaCl = ?", hints:{hindi:"van't हॉफ गुणांक",english:"van't Hoff factor",hinglish:"van't Hoff factor",tamil:"வான்ட் ஹாஃப் காரணி",bengali:"ভ্যান্ট হফ ফ্যাক্টর"}, ans:"2", opts:["2","1","3","0.5"] },
+  { lvl:20, topic:"Master", r:"Freundlich adsorption: x/m = k·P^?", hints:{hindi:"फ्रायंडलिक समतापी",english:"Freundlich isotherm",hinglish:"Freundlich isotherm",tamil:"ஃப்ரீண்ட்லிச் ஐசோதெர்ம்",bengali:"ফ্রয়েন্ডলিখ আইসোথার্ম"}, ans:"1/n", opts:["1/n","n","1/P","P²"] },
+  { lvl:20, topic:"Master", r:"Raoult's law: p = p° × ?", hints:{hindi:"राउल्ट का नियम",english:"Raoult's law",hinglish:"Raoult's law",tamil:"ரவுல்ட்டின் விதி",bengali:"রাউলের সূত্র"}, ans:"x (mole fraction)", opts:["x (mole fraction)","molality","molarity","mass fraction"] },
+];
 
-function load() {
-  const L = levels[lvl], Q = L.questions[q];
-  document.getElementById('levelPill').textContent = L.short;
-  document.getElementById('reactionText').textContent = Q.r;
-  document.getElementById('hintText').textContent = Q.hint;
-  document.getElementById('sCorrect').textContent = correct;
-  document.getElementById('sWrong').textContent = wrong;
-  document.getElementById('sQ').textContent = (lvl*5+q+1)+"/"+total;
-  const pct = Math.round((lvl*5+q)/total*100);
-  document.getElementById('progFill').style.width = pct+'%';
-  document.getElementById('progPct').textContent = pct+'%';
-  document.getElementById('progLabel').textContent = L.name;
-  document.getElementById('feedback').textContent = '';
-  document.getElementById('feedback').className = 'feedback';
-  document.getElementById('nextBtn').disabled = true;
+const allQ = [...ALL_QUESTIONS, ...extraQs];
+
+// Group by level
+const levels = {};
+for(let i=1;i<=20;i++) levels[i] = allQ.filter(q=>q.lvl===i);
+
+let lang = 'hinglish', currentLvl = 1, currentQ = 0, correct = 0, wrong = 0, streak = 0, maxStreak = 0, answered = false, timer = null, timeLeft = 20, totalTime = 0;
+const TOTAL_LEVELS = 20;
+let leaderboard = JSON.parse(localStorage.getItem('chemGuru_lb') || '[]');
+
+function getLvlQuestions() { return levels[currentLvl] || []; }
+function getTotalQ() { return Object.values(levels).reduce((s,v)=>s+v.length,0); }
+function getDoneQ() { return Object.keys(levels).filter(k=>k<currentLvl).reduce((s,k)=>s+levels[k].length,0) + currentQ; }
+
+function renderLangScreen() {
+  document.getElementById('app').innerHTML = `
+    <div class="lang-screen">
+      <div class="logo-big">⚗️ Chem Guru</div>
+      <div class="logo-sub">Chemistry Puzzle Game • 20 Levels • 100+ Questions</div>
+      <div class="lang-title">Select your language / अपनी भाषा चुनें</div>
+      <div class="lang-grid">
+        ${Object.entries(LANGS).map(([k,v])=>`<button class="lang-btn ${lang===k?'selected':''}" onclick="selectLang('${k}')">${v.flag} ${v.name}</button>`).join('')}
+      </div>
+      <button class="start-btn" onclick="startGame()">${LANGS[lang].start} →</button>
+    </div>`;
+}
+
+function selectLang(l) { lang = l; renderLangScreen(); }
+
+function startGame() {
+  currentLvl=1; currentQ=0; correct=0; wrong=0; streak=0; maxStreak=0; totalTime=0;
+  renderGame();
+}
+
+function renderGame() {
+  const qs = getLvlQuestions();
+  if(currentQ >= qs.length) {
+    if(currentLvl < TOTAL_LEVELS) { currentLvl++; currentQ=0; renderGame(); }
+    else { clearInterval(timer); renderEnd(); }
+    return;
+  }
+  const Q = qs[currentQ];
+  const L = LANGS[lang];
+  const done = getDoneQ(), total = getTotalQ();
+  const pct = Math.round(done/total*100);
+  const lvlName = `${L.levelWord} ${currentLvl}/20`;
+
+  document.getElementById('app').innerHTML = `
+    <div class="top-bar">
+      <div class="logo">⚗️ Chem Guru</div>
+      <div class="top-right">
+        <div class="level-pill" id="levelPill">${lvlName}</div>
+        <div class="timer-pill" id="timerPill">⏱ 20s</div>
+      </div>
+    </div>
+    <div class="score-row">
+      <div class="score-card s-correct"><div class="val" id="sC">${correct}</div><div class="lbl">Sahi ✓</div></div>
+      <div class="score-card s-wrong"><div class="val" id="sW">${wrong}</div><div class="lbl">Galat ✗</div></div>
+      <div class="score-card s-total"><div class="val" id="sQ">${done+1}/${total}</div><div class="lbl">Sawaal</div></div>
+      <div class="score-card s-streak"><div class="val" id="sStr">${streak}</div><div class="lbl">Streak 🔥</div></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-label"><span>${Q.topic}</span><span id="pPct">${pct}%</span></div>
+      <div class="progress-bg"><div class="progress-fill" id="pFill" style="width:${pct}%"></div></div>
+    </div>
+    <div class="q-card">
+      <div class="q-tag">${L.q}</div>
+      <div class="topic-badge">${Q.topic}</div>
+      <div class="reaction">${Q.r}</div>
+      <div class="hint-box"><strong>${L.hint}:</strong> ${Q.hints[lang]||Q.hints.hinglish}</div>
+    </div>
+    <div class="options" id="optGrid"></div>
+    <div class="feedback" id="fb"></div>
+    <button class="next-btn" id="nBtn" disabled onclick="nextQ()">${L.next}</button>`;
+
   answered = false;
-
   const grid = document.getElementById('optGrid');
-  grid.innerHTML = '';
-  [...Q.opts].sort(()=>Math.random()-0.5).forEach(o => {
-    const b = document.createElement('button');
-    b.className = 'opt'; b.textContent = o;
-    b.onclick = () => check(o, Q.ans);
+  [...Q.opts].sort(()=>Math.random()-0.5).forEach(o=>{
+    const b=document.createElement('button');
+    b.className='opt'; b.textContent=o;
+    b.onclick=()=>checkAns(o,Q.ans);
     grid.appendChild(b);
   });
+  startTimer();
 }
 
-function check(sel, ans) {
-  if (answered) return;
+function startTimer() {
+  clearInterval(timer);
+  timeLeft = 20;
+  updateTimer();
+  timer = setInterval(()=>{
+    timeLeft--;
+    totalTime++;
+    updateTimer();
+    if(timeLeft<=0) { clearInterval(timer); timeUp(); }
+  },1000);
+}
+
+function updateTimer() {
+  const el = document.getElementById('timerPill');
+  if(!el) return;
+  el.textContent = `⏱ ${timeLeft}s`;
+  el.className = timeLeft<=5 ? 'timer-pill danger' : 'timer-pill';
+}
+
+function timeUp() {
+  if(answered) return;
   answered = true;
-  document.querySelectorAll('.opt').forEach(b => {
-    b.onclick = null;
-    if (b.textContent === ans) b.classList.add('correct');
-    else if (b.textContent === sel) b.classList.add('wrong');
+  wrong++;
+  streak = 0;
+  document.getElementById('sW').textContent = wrong;
+  document.getElementById('sStr').textContent = streak;
+  const qs = getLvlQuestions();
+  const Q = qs[currentQ];
+  document.querySelectorAll('.opt').forEach(b=>{
+    b.onclick=null;
+    if(b.textContent===Q.ans) b.classList.add('correct');
   });
-  const fb = document.getElementById('feedback');
-  if (sel === ans) {
-    correct++;
-    fb.textContent = '✓ Sahi jawab! Ekdum perfect!';
+  const fb=document.getElementById('fb');
+  fb.textContent = '⏰ Time up! ' + LANGS[lang].wrong + Q.ans;
+  fb.className = 'feedback wrong';
+  document.getElementById('nBtn').disabled = false;
+}
+
+function checkAns(sel, ans) {
+  if(answered) return;
+  answered = true;
+  clearInterval(timer);
+  document.querySelectorAll('.opt').forEach(b=>{
+    b.onclick=null;
+    if(b.textContent===ans) b.classList.add('correct');
+    else if(b.textContent===sel) b.classList.add('wrong');
+  });
+  const fb=document.getElementById('fb');
+  const L=LANGS[lang];
+  if(sel===ans) {
+    correct++; streak++; if(streak>maxStreak) maxStreak=streak;
+    fb.textContent = L.correct + (streak>=3 ? ` 🔥 ${streak} streak!` : '');
     fb.className = 'feedback correct';
+    if(streak>=3) showStreak(streak);
   } else {
-    wrong++;
-    fb.textContent = '✗ Galat! Sahi answer: ' + ans;
+    wrong++; streak=0;
+    fb.textContent = L.wrong + ans;
     fb.className = 'feedback wrong';
   }
-  document.getElementById('sCorrect').textContent = correct;
-  document.getElementById('sWrong').textContent = wrong;
-  document.getElementById('nextBtn').disabled = false;
+  document.getElementById('sC').textContent=correct;
+  document.getElementById('sW').textContent=wrong;
+  document.getElementById('sStr').textContent=streak;
+  document.getElementById('nBtn').disabled=false;
 }
 
-function nextQuestion() {
-  q++;
-  if (q >= levels[lvl].questions.length) {
-    if (lvl < levels.length - 1) { lvl++; q = 0; load(); }
-    else showEnd();
-  } else load();
+function showStreak(n) {
+  const el=document.getElementById('streakPopup');
+  el.textContent = `🔥 ${n}x Streak!`;
+  el.style.display='block';
+  setTimeout(()=>el.style.display='none',1800);
 }
 
-function showEnd() {
-  const pct = Math.round(correct/total*100);
-  let emoji, msg;
-  if (pct >= 90) { emoji = '🏆'; msg = 'Waah bhai! Tum toh Chemistry ke ustaad ho! NEET/JEE crack karoge!'; }
-  else if (pct >= 70) { emoji = '🥳'; msg = 'Bahut accha kiya! Thoda aur practice karo, top aajaaoge!'; }
-  else if (pct >= 50) { emoji = '💪'; msg = 'Theek hai! Practice karte raho, chemistry mein zaroor maahir banoге!'; }
-  else { emoji = '📚'; msg = 'Koi baat nahi! Phir se try karo — har baar better hoga!'; }
+function nextQ() {
+  currentQ++;
+  renderGame();
+}
+
+function renderEnd() {
+  const total=getTotalQ();
+  const pct=Math.round(correct/total*100);
+  const mins=Math.floor(totalTime/60), secs=totalTime%60;
+  let emoji,msg;
+  if(pct>=90){emoji='🏆';msg='Waah bhai! Chemistry ke ustaad ho! NEET/JEE pakka!';}
+  else if(pct>=70){emoji='🥳';msg='Bahut accha! Thoda practice aur karo!';}
+  else if(pct>=50){emoji='💪';msg='Accha kiya! Aur practice karte raho!';}
+  else{emoji='📚';msg='Koi baat nahi! Phir koshish karo!';}
 
   document.getElementById('app').innerHTML = `
     <div class="end-screen">
       <div class="end-emoji">${emoji}</div>
       <div class="end-title">Game Khatam!</div>
       <div class="end-score-big">${correct}/${total}</div>
-      <div class="end-score-sub">${pct}% sahi jawab diye tumne</div>
+      <div class="end-score-sub">${pct}% sahi jawab</div>
+      <div class="end-stats">
+        <div class="end-stat"><div class="v">${maxStreak}</div><div class="l">Max Streak 🔥</div></div>
+        <div class="end-stat"><div class="v">${mins}:${secs<10?'0'+secs:secs}</div><div class="l">Time ⏱</div></div>
+        <div class="end-stat"><div class="v">${wrong}</div><div class="l">Galat ✗</div></div>
+      </div>
       <div class="end-msg">${msg}</div>
-      <button class="restart-btn" onclick="location.reload()">Phir se Khelein 🔄</button>
+      <div class="lb-screen">
+        <div class="lb-title">🏅 Leaderboard</div>
+        <div class="lb-input-row">
+          <input class="lb-input" id="nameInput" placeholder="Apna naam likho..." maxlength="20"/>
+          <button class="lb-save-btn" onclick="saveScore(${correct},${pct})">Save</button>
+        </div>
+        ${renderLB()}
+      </div>
+      <button class="play-again-btn" onclick="renderLangScreen()">Phir se Khelein 🔄</button>
     </div>`;
 }
 
-load();
+function renderLB() {
+  if(!leaderboard.length) return '<p style="text-align:center;color:var(--muted);font-size:13px;">Abhi koi score nahi — pehle save karo!</p>';
+  const sorted=[...leaderboard].sort((a,b)=>b.score-a.score).slice(0,10);
+  const medals=['🥇','🥈','🥉'];
+  return `<table class="lb-table">
+    <tr><th>#</th><th>Naam</th><th>Score</th><th>%</th></tr>
+    ${sorted.map((e,i)=>`<tr><td class="lb-rank">${medals[i]||i+1}</td><td>${e.name}</td><td>${e.score}</td><td>${e.pct}%</td></tr>`).join('')}
+  </table>`;
+}
+
+function saveScore(score,pct) {
+  const name=document.getElementById('nameInput').value.trim()||'Anonymous';
+  leaderboard.push({name,score,pct,date:new Date().toLocaleDateString()});
+  leaderboard.sort((a,b)=>b.score-a.score);
+  if(leaderboard.length>20) leaderboard=leaderboard.slice(0,20);
+  localStorage.setItem('chemGuru_lb',JSON.stringify(leaderboard));
+  renderEnd();
+}
+
+renderLangScreen();
 </script>
 </body>
 </html>
